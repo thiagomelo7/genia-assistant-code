@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Refatoração</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #007bff; text-align: center; }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 5px; margin-top: 20px; color: #333; }
+        .metricas { display: flex; justify-content: space-around; background: #e9ecef; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .metrica-item { text-align: center; }
+        .metrica-valor { font-size: 2em; font-weight: bold; color: #28a745; }
+        .metrica-label { color: #6c757d; }
+        .smells-list, .justificativa { border: 1px solid #ccc; padding: 15px; border-radius: 4px; background: #f8f9fa; }
+        pre { background-color: #272822; color: #f8f8f2; padding: 15px; border-radius: 4px; overflow-x: auto; }
+        code { font-family: monospace; }
+        .melhora-high { color: #28a745; }
+        .melhora-medium { color: #ffc107; }
+        .melhora-low { color: #dc3545; }
+        .error-message { background: #f8d7da; color: #721c24; padding: 15px; border: 1px solid #f5c6cb; border-radius: 4px; }
+        .home-button { display: inline-block; background-color: #6c757d; color: white; padding: 10px 15px; border-radius: 4px; text-decoration: none; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        {% if error %}
+            <h1 style="color: #dc3545;">❌ Erro na Análise</h1>
+            <p>Ocorreu um problema durante a comunicação com o Assistente de Refatoração.</p>
+            
+            <h2>Detalhes do Erro</h2>
+            <div class="error-message">
+                <p><strong>Mensagem:</strong> {{ relatorio.error }}</p>
+                {% if relatorio.raw_output %}
+                    <p><strong>Saída Bruta da LLM:</strong></p>
+                    <pre>{{ relatorio.raw_output }}</pre>
+                {% endif %}
+            </div>
+            
+        {% else %}
+            <h1>✅ Relatório de Refatoração Concluída</h1>
+            <p>Abaixo estão os resultados da análise e refatoração do código na linguagem **{{ relatorio.linguagem }}**.</p>
+
+            <h2>Estatísticas de Complexidade Ciclomática (CC)</h2>
+            <div class="metricas">
+                <div class="metrica-item">
+                    <div class="metrica-valor">{{ relatorio.complexidade.original }}</div>
+                    <div class="metrica-label">CC Original</div>
+                </div>
+                <div class="metrica-item">
+                    <div class="metrica-valor">{{ relatorio.complexidade.refatorada }}</div>
+                    <div class="metrica-label">CC Refatorada</div>
+                </div>
+                {% set melhora_class = 'melhora-high' if relatorio.complexidade.melhora_percentual|float >= 30 else ('melhora-medium' if relatorio.complexidade.melhora_percentual|float >= 10 else 'melhora-low') %}
+                <div class="metrica-item">
+                    <div class="metrica-valor"><span class="{{ melhora_class }}">{{ relatorio.complexidade.melhora_percentual }}</span></div>
+                    <div class="metrica-label">Melhora de Qualidade (%)</div>
+                </div>
+            </div>
+
+            <h2>Code Smells Identificados (pela LLM)</h2>
+            <div class="smells-list">
+                <p><strong>Code Smells:</strong> {{ relatorio.code_smells }}</p>
+            </div>
+            
+            <h2>Justificativa da Refatoração</h2>
+            <div class="justificativa">
+                <p>{{ relatorio.justificativa_refatoracao }}</p>
+            </div>
+
+            <h2>Código Refatorado</h2>
+            <p>O novo código visa maior Coesão e menor Acoplamento:</p>
+            <pre><code>{{ relatorio.codigo_refatorado }}</code></pre>
+            
+        {% endif %}
+
+        <a href="/" class="home-button">← Refatorar Novo Código</a>
+    </div>
+</body>
+</html>

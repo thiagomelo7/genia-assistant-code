@@ -1,0 +1,38 @@
+{
+  "times": [
+    {
+      "nome": "Corinthians",
+      "overall_ataque": 80,
+      "overall_defesa": 75,
+      "overall_meio": 78
+    },
+    {
+      "nome": "Palmeiras",
+      "overall_ataque": 85,
+      "overall_defesa": 82,
+      "overall_meio": 80
+    },
+    {
+      "nome": "São Paulo",
+      "overall_ataque": 78,
+      "overall_defesa": 79,
+      "overall_meio": 77
+    }
+  ],
+  "historico_confrontos": [
+    {
+      "time_1": "Corinthians",
+      "time_2": "Palmeiras",
+      "vitorias_t1": 10,
+      "vitorias_t2": 5,
+      "empates": 3
+    },
+    {
+      "time_1": "São Paulo",
+      "time_2": "Corinthians",
+      "vitorias_t1": 8,
+      "vitorias_t2": 12,
+      "empates": 5
+    }
+  ]
+}
