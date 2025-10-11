@@ -172,8 +172,8 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 **Thiago Melo Pereira**
 
-- GitHub: [@thiagomelopereira](https://github.com/thiagomelopereira)
-- LinkedIn: [Thiago Melo Pereira](https://linkedin.com/in/thiagomelopereira)
+- GitHub: [@thiagomelopereira](https://github.com/thiagomelo7)
+- LinkedIn: [Thiago Melo Pereira](https://linkedin.com/in/thiago-melo-pereira)
 
 ## 🙏 Agradecimentos
 
