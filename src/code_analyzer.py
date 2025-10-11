@@ -11,14 +11,8 @@ class CodeAnalyzer:
         melhora = (1 - (cc_refatorado / cc_original)) * 100
         return max(0.0, melhora) 
     
-    def _calcular_cc_simulado(self, codigo: str) -> int:
-        """
-        Calcula a Complexidade Ciclomática SIMULADA (count lines).
-        
-        PARA O PROJETO FINAL: Substituir esta função pelo uso de uma biblioteca
-        como 'radon' ou 'Lizard' para cálculo real.
-        """
-        return len(codigo.splitlines())
+    # OBSERVAÇÃO: As funções de cálculo de CC local (radon) foram removidas,
+    # pois a LLM está realizando o cálculo.
 
     def refatorar_e_analisar(self, codigo_original: str, linguagem: str) -> dict:
         """Coordena o pipeline de refatoração, análise e métricas."""
@@ -26,23 +20,35 @@ class CodeAnalyzer:
         # 1. Geração do Código Refatorado (Primeira chamada LLM)
         codigo_refatorado = self.llm_service.get_refactored_code(codigo_original, linguagem)
         
-        # 2. Análise e Justificativa (Segunda chamada LLM)
+        # 2. Análise, Justificativa e CÁLCULO DE CC (Segunda chamada LLM)
         analysis_data = self.llm_service.get_analysis_json(codigo_original, codigo_refatorado, linguagem)
 
-        # 3. Cálculo de Métricas
-        cc_original = self._calcular_cc_simulado(codigo_original)
-        cc_refatorado = self._calcular_cc_simulado(codigo_refatorado)
+        # 3. Leitura e Validação das Métricas Calculadas pela LLM
+        cc_original = 1
+        cc_refatorado = 1
+        
+        try:
+            # AQUI: Lemos os valores diretamente do JSON, convertendo para int
+            cc_original = int(analysis_data.get('cc_original_llm', 1))
+            cc_refatorado = int(analysis_data.get('cc_refatorado_llm', 1))
+        except (TypeError, ValueError):
+            # Se a LLM falhar em dar um número (ex: retorna "oito" ou null), usamos fallback.
+            analysis_data['justificativa_refatoracao'] += " [AVISO: A LLM falhou ao retornar valores numéricos de CC e usou o fallback CC=1.]"
+            cc_original = 1 
+            cc_refatorado = 1
+            
+        # 4. Cálculo da Melhora (Fórmula Matemática)
         melhora_percentual = self._calcular_melhora_cc(cc_original, cc_refatorado)
 
-        # 4. Consolidação do Relatório
+        # 5. Consolidação do Relatório
         relatorio = {
             "linguagem": linguagem,
             "code_smells": analysis_data.get('code_smells', 'N/A'),
             "codigo_refatorado": codigo_refatorado,
             "justificativa_refatoracao": analysis_data.get('justificativa_refatoracao', 'N/A'),
             "complexidade": {
-                "original": cc_original,
-                "refatorada": cc_refatorado,
+                "original": cc_original, 
+                "refatorada": cc_refatorado, 
                 "melhora_percentual": f"{melhora_percentual:.2f}%"
             }
         }

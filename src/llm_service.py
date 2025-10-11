@@ -32,6 +32,7 @@ class LLMService:
             response.raise_for_status()
             analise_json = response.json()
 
+            # Verificação de segurança: checa se há conteúdo válido
             if (analise_json.get('candidates') and
                 analise_json['candidates'][0].get('content') and
                 analise_json['candidates'][0]['content'].get('parts')):
@@ -50,7 +51,7 @@ class LLMService:
 
         except requests.exceptions.RequestException as e:
             status_code = response.status_code if 'response' in locals() else 'N/A'
-            raise RuntimeError(f"Erro na requisição à API ({status_code}). Verifique a URL e sua chave. {e}")
+            raise RuntimeError(f"Erro na requisição à API ({status_code}). {e}")
         except (KeyError, IndexError) as e:
             raise RuntimeError(f"Erro ao extrair texto da resposta da API (Estrutura incorreta após HTTP 200): {e}")
 
@@ -66,18 +67,23 @@ class LLMService:
         return self._make_api_request(prompt).strip()
 
     def get_analysis_json(self, codigo_original: str, codigo_refatorado: str, linguagem: str) -> dict:
-        """Gera o JSON de análise e justificativa (Segunda chamada)"""
+        """
+        Gera o JSON de análise e justificativa, INCLUINDO o cálculo de CC.
+        """
         analysis_prompt = f"""
-        Analise o Código Original e o Código Refatorado abaixo. 
-        Retorne APENAS um objeto JSON VÁLIDO e LIMPO (sem markdown, aspas, ou texto extra).
+        Analise o Código Original e o Código Refatorado, ambos na linguagem {linguagem}. 
+        Para cada código, calcule a Complexidade Ciclomática (CC) contando os pontos de decisão (if, while, for, case, ?, &&, ||) e adicionando 1.
 
-        Linguagem: {linguagem}
+        Retorne APENAS um objeto JSON VÁLIDO e LIMPO.
+
         Código Original: ---{codigo_original}---
         Código Refatorado: ---{codigo_refatorado}---
 
         O JSON deve ter as chaves: 
         1. "code_smells" (string): Liste os 3 principais Code Smells do Código Original.
-        2. "justificativa_refatoracao" (string): Explique como o Código Refatorado corrige os Smells e reduz a Complexidade Ciclomática.
+        2. "justificativa_refatoracao" (string): Explique como a refatoração reduz a CC.
+        3. "cc_original_llm" (integer): O valor da Complexidade Ciclomática calculada para o Código Original.
+        4. "cc_refatorado_llm" (integer): O valor da Complexidade Ciclomática calculada para o Código Refatorado.
         """
         json_string = self._make_api_request(analysis_prompt)
         
